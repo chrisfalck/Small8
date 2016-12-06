@@ -71,16 +71,15 @@ architecture behavior of S8_Controller is
     constant BEQA_7: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(30, 6));
     constant BEQA_8: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(31, 6));
 
+    -- A + D + C_flag -> A
+    constant ADCR: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(32, 6));
+    constant ADCR_2: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(33, 6));
+    constant ADCR_3: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(34, 6));
+    constant ADCR_4: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(35, 6));
+
     -- constant STAA: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(17, 6));
     -- constant STAA_2: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(9, 6));
     -- constant STAA_3: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(10, 6));
-
-    -- -- A + D + C_flag -> A
-    -- constant ADCR: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(16, 6));
-    -- constant ADCR_2: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(17, 6));
-    -- constant ADCR_3: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(18, 6));
-    -- constant ADCR_4: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(19, 6));
-
 
     signal curr_state, next_state: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(0, 6));
 
@@ -153,8 +152,8 @@ begin
                 next_state <= STAR;
             elsif (IR_data = "00100001") then
                 next_state <= ANDR;
-            -- elsif (IR_data = "00000001") then
-            --     next_state <= ADCR;
+            elsif (IR_data = "00000001") then
+                next_state <= ADCR;
             elsif (IR_data = "10110010") then
                 next_state <= BEQA;
             else
@@ -271,26 +270,26 @@ begin
         -- --      (7) = upper increment (6) = lower increment (5) = upper tristate enable (4) = lower tristate enable, 
         -- --      (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
         -- -- A + D + Carry_in -> A
-        -- elsif (curr_state = ADCR) then
-        --     A_control(2) <= '1'; -- drive bus
-        --     Temp_1_control(1) <= '1'; -- read from bus
-        --     next_state <= ADCR_2;
-        -- elsif (curr_state = ADCR_2) then
-        --     D_control(2) <= '1'; -- drive bus
-        --     Temp_2_control(1) <= '1'; -- read from bus
-        --     next_state <= ADCR_3;
-        -- elsif (curr_state = ADCR_3) then
-        --     Temp_3_control(1) <= '1'; -- read from alu bus
-        --     ALU_flag_control(7) <= '1'; -- Z flag load
-        --     ALU_flag_control(5) <= '1'; -- S flag load 
-        --     ALU_flag_control(3) <= '1'; -- V flag load 
-        --     ALU_flag_control(1) <= '1'; -- C flag load 
-        --     ALU_control <= "0101";
-        --     next_state <= ADCR_4;
-        -- elsif (curr_state = ADCR_4) then
-        --     Temp_3_control(2) <= '1'; -- drive bus
-        --     A_control(1) <= '1'; -- read from bus
-        --     next_state <= fetch_opcode;
+        elsif (curr_state = ADCR) then
+            A_control(2) <= '1'; -- drive bus
+            Temp_1_control(1) <= '1'; -- read from bus
+            next_state <= ADCR_2;
+        elsif (curr_state = ADCR_2) then
+            D_control(2) <= '1'; -- drive bus
+            Temp_2_control(1) <= '1'; -- read from bus
+            next_state <= ADCR_3;
+        elsif (curr_state = ADCR_3) then
+            Temp_3_control(1) <= '1'; -- read from alu bus
+            ALU_flag_control(7) <= '1'; -- Z flag load
+            ALU_flag_control(5) <= '1'; -- S flag load 
+            ALU_flag_control(3) <= '1'; -- V flag load 
+            ALU_flag_control(1) <= '1'; -- C flag load 
+            ALU_control <= "0101";
+            next_state <= ADCR_4;
+        elsif (curr_state = ADCR_4) then
+            Temp_3_control(2) <= '1'; -- drive bus
+            A_control(1) <= '1'; -- read from bus
+            next_state <= fetch_opcode;
 
         -- -- Single register: 
         -- --      (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
