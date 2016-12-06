@@ -58,6 +58,19 @@ architecture behavior of S8_Controller is
     constant ANDR_3: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(20, 6));
     constant ANDR_4: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(21, 6));
 
+    -- If the Z flag is '1', load the next two bytes of memory into PC. 
+    -- Otherwise, continue PC after skipping the two address bytes. 
+    constant BEQA: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(22, 6));
+    constant BEQA_2: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(23, 6));
+    constant BEQA_2_1: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(24, 6));
+    constant BEQA_3: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(25, 6));
+    constant BEQA_4: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(26, 6));
+    constant BEQA_5: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(27, 6));
+    constant BEQA_5_1: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(28, 6));
+    constant BEQA_6: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(29, 6));
+    constant BEQA_7: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(30, 6));
+    constant BEQA_8: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(31, 6));
+
     -- constant STAA: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(17, 6));
     -- constant STAA_2: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(9, 6));
     -- constant STAA_3: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(10, 6));
@@ -68,11 +81,6 @@ architecture behavior of S8_Controller is
     -- constant ADCR_3: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(18, 6));
     -- constant ADCR_4: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(19, 6));
 
-    -- constant BEQA: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(20, 6));
-    -- constant BEQA_2: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(21, 6));
-    -- constant BEQA_3: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(22, 6));
-    -- constant BEQA_4: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(23, 6));
-    -- constant BEQA_5: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(24, 6));
 
     signal curr_state, next_state: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(0, 6));
 
@@ -137,18 +145,18 @@ begin
             next_state <= decode_opcode;
 
         elsif (curr_state = decode_opcode) then 
-            if (IR_data = "10001000") then -- LDAA
+            if (IR_data = "10001000") then
                 next_state <= LDAA;
-            -- elsif (IR_data = "11110110") then -- STAA
+            -- elsif (IR_data = "11110110") then
                 -- next_state <= STAA;
-            elsif (IR_data = "11110001") then -- STAR
+            elsif (IR_data = "11110001") then
                 next_state <= STAR;
-            elsif (IR_data = "00100001") then -- ANDR
+            elsif (IR_data = "00100001") then
                 next_state <= ANDR;
-            -- elsif (IR_data = "00000001") then -- ADCR
+            -- elsif (IR_data = "00000001") then
             --     next_state <= ADCR;
-            -- elsif (IR_data = "11010010") then -- BEQA
-            --     next_state <= BEQA;
+            elsif (IR_data = "10110010") then
+                next_state <= BEQA;
             else
                 next_state <= curr_state;
             end if;
@@ -163,55 +171,44 @@ begin
             PC_control(4) <= '1'; -- drive bus
             AR_control(1) <= '1'; -- read from bus        
             next_state <= LDAA_2;
-
         elsif (curr_state = LDAA_2) then
             PC_control(5) <= '1'; -- drive bus
             AR_control(3) <= '1'; -- read from bus
             next_state <= LDAA_3_1;
-
         elsif (curr_state = LDAA_3_1) then -- Wait for address to register.
             next_state <= LDAA_3;
-
         elsif (curr_state = LDAA_3) then 
             Ram_out_bus_control <= '1'; -- drive bus with mem
             Temp_4_control(1) <= '1'; -- read from bus
             PC_control(6) <= '1'; -- inc lower
             next_state <= LDAA_4;
-
         elsif (curr_state = LDAA_4) then 
             PC_control(4) <= '1'; -- drive bus
             AR_control(1) <= '1'; -- read from bus        
             next_state <= LDAA_5;
-
         elsif (curr_state = LDAA_5) then 
             PC_control(5) <= '1'; -- drive bus
             AR_control(3) <= '1'; -- read from bus
             next_state <= LDAA_5_1;
-        
         elsif (curr_state = LDAA_5_1) then
             -- Wait for address to register.
             next_state <= LDAA_6; 
-
         elsif (curr_state <= LDAA_6) then
             Ram_out_bus_control <= '1'; -- drive bus with mem
             Temp_5_control(1) <= '1'; -- read from bus
             next_state <= LDAA_7;
-
         elsif (curr_state = LDAA_7) then 
             Temp_4_control(2) <= '1'; -- drive bus
             AR_control(1) <= '1'; -- read from bus        
             next_state <= LDAA_8;
-
         elsif (curr_state = LDAA_8) then 
             Temp_5_control(2) <= '1'; -- drive bus
             AR_control(3) <= '1'; -- read from bus        
             PC_control(6) <= '1'; -- inc lower
             next_state <= LDAA_8_1;          
-
         elsif (curr_state = LDAA_8_1) then 
             -- Wait for address to register. 
             next_state <= LDAA_9;
-            
         elsif (curr_state = LDAA_9) then
             Ram_out_bus_control <= '1'; -- drive bus with mem
             A_control(1) <= '1'; -- read from bus
@@ -268,7 +265,6 @@ begin
             Temp_3_control(2) <= '1'; -- drive bus
             A_control(1) <= '1'; -- read from bus
             next_state <= fetch_opcode;
-
         -- -- Single register: 
         -- --      (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
         -- -- Dual Register: 
@@ -301,36 +297,53 @@ begin
         -- -- Dual Register: 
         -- --      (7) = upper increment (6) = lower increment (5) = upper tristate enable (4) = lower tristate enable, 
         -- --      (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
-        -- elsif (curr_state = BEQA) then
-        --     PC_control(6) <= '1'; -- inc lower
-        --     if (ALU_flags(3) = '1') then 
-        --         PC_control(4) <= '1'; -- drive bus from lower
-        --         AR_control(1) <= '1'; -- read lower from bus
-        --         next_state <= BEQA_2; 
-        --     else
-        --         next_state <= BEQA_2;
-        --     end if;
-        -- elsif (curr_state = BEQA_2) then 
-        --     PC_control(6) <= '1'; -- inc lower, this puts us on the next opcode
-        --     if (ALU_flags(3) = '1') then 
-        --         PC_control(5) <= '1'; -- drive bus from upper
-        --         AR_control(3) <= '1'; -- read from lower
-        --         next_state <= BEQA_3;
-        --     else 
-        --        next_state <= fetch_opcode;  -- if not branching, we're done
-        --     end if;
-        -- elsif (curr_state = BEQA_3) then
-        --     AR_control(5) <= '1'; -- drive mem bus from upper
-        --     AR_control(4) <= '1'; -- drive mem bus from lower
-        --     Ram_out_bus_control <= '1'; -- drive bus with new PC
-        --     PC_control(1) <= '1'; -- read lower from bus
-        --     next_state <= BEQA_4;
-        -- elsif (curr_state = BEQA_4) then 
-        --     AR_control(5) <= '1'; -- drive mem bus from upper
-        --     AR_control(4) <= '1'; -- drive mem bus from lower
-        --     Ram_out_bus_control <= '1'; -- drive bus with new PC
-        --     PC_control(3) <= '1'; -- read upper from bus
-        --     next_state <= fetch_opcode;
+        elsif (curr_state = BEQA) then
+            if (ALU_flags(3) = '1') then 
+                PC_control(4) <= '1'; -- drive bus from lower
+                AR_control(1) <= '1'; -- read lower from bus
+                next_state <= BEQA_2; 
+            else
+                PC_control(6) <= '1';
+                next_state <= BEQA_2;
+            end if;
+        elsif (curr_state = BEQA_2) then 
+            if (ALU_flags(3) = '1') then 
+                PC_control(5) <= '1'; -- drive bus from upper
+                AR_control(3) <= '1'; -- read from lower
+                next_state <= BEQA_2_1;
+            else 
+                PC_control(6) <= '1';
+                next_state <= fetch_opcode;  -- if not branching, we're done
+            end if;
+        elsif (curr_state = BEQA_2_1) then 
+            next_state <= BEQA_3;
+        elsif (curr_state = BEQA_3) then
+            PC_control(6) <= '1';
+            Ram_out_bus_control <= '1'; -- drive bus with new PC
+            Temp_4_control(1) <= '1'; -- read lower from bus
+            next_state <= BEQA_4;
+        elsif (curr_state = BEQA_4) then 
+            PC_control(4) <= '1'; -- drive bus from lower
+            AR_control(1) <= '1'; -- read lower from bus
+            next_state <= BEQA_5; 
+        elsif (curr_state = BEQA_5) then 
+            PC_control(5) <= '1'; -- drive bus from lower
+            AR_control(3) <= '1'; -- read lower from bus
+            next_state <= BEQA_5_1;
+        elsif (curr_state = BEQA_5_1) then 
+            next_state <= BEQA_6;
+        elsif (curr_state = BEQA_6) then 
+            Ram_out_bus_control <= '1';
+            Temp_5_control(1) <= '1';
+            next_state <= BEQA_7;
+        elsif (curr_state <= BEQA_7) then 
+            Temp_4_control(2) <= '1';
+            PC_control(1) <= '1';
+            next_state <= BEQA_8;
+        elsif (curr_state <= BEQA_8) then 
+            Temp_5_control(2) <= '1';
+            PC_control(3) <= '1';
+            next_state <= fetch_opcode; 
         end if;
 
     end process;
