@@ -19,7 +19,7 @@ architecture behavior of Small8 is
     -- Data register
     signal D_control_sig: std_logic_vector(3 downto 0) := (others => '0');
     -- Instruction register
-    signal IR_control_sig, Temp_1_control_sig, Temp_2_control_sig, Temp_3_control_sig: std_logic_vector(3 downto 0) := (others => '0');
+    signal IR_control_sig, Temp_1_control_sig, Temp_2_control_sig, Temp_3_control_sig, Temp_4_control_sig, Temp_5_control_sig: std_logic_vector(3 downto 0) := (others => '0');
 
     
     -- (5) = upper tristate enable (4) = lower tristate enable, 
@@ -58,7 +58,7 @@ architecture behavior of Small8 is
             -- '1' = write to, '0' = read from
             Ram_control, ram_out_bus_control: out std_logic;
             -- (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
-            A_control, D_control, IR_control, Temp_1_control, Temp_2_control, Temp_3_control: out std_logic_vector(3 downto 0); 
+            A_control, D_control, IR_control, Temp_1_control, Temp_2_control, Temp_3_control, Temp_4_control, Temp_5_control: out std_logic_vector(3 downto 0); 
             -- (7) = upper increment (6) = lower increment (5) = upper tristate enable (4) = lower tristate enable, 
             -- (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
             PC_control, X_control, AR_control, SP_control: out std_logic_vector(7 downto 0) 
@@ -78,7 +78,7 @@ architecture behavior of Small8 is
             -- (3) = Z, (2) = S, (1) = V, (0) = C
             ALU_flags: out std_logic_vector(3 downto 0);
             -- (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
-            A_control, D_control, IR_control, Temp_1_control, Temp_2_control, Temp_3_control: in std_logic_vector(3 downto 0); 
+            A_control, D_control, IR_control, Temp_1_control, Temp_2_control, Temp_3_control, Temp_4_control, Temp_5_control: in std_logic_vector(3 downto 0); 
             -- (7) = upper increment (6) = lower increment (5) = upper tristate enable (4) = lower tristate enable, 
             -- (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
             PC_control, X_control, AR_control, SP_control: in std_logic_vector(7 downto 0)        
@@ -122,6 +122,8 @@ begin
         Temp_1_control => Temp_1_control_sig,
         Temp_2_control => Temp_2_control_sig,
         Temp_3_control => Temp_3_control_sig,
+        Temp_4_control => Temp_4_control_sig,
+        Temp_5_control => Temp_5_control_sig,
         PC_control => PC_control_sig,
         X_control => X_control_sig,
         AR_control => AR_control_sig,
@@ -147,6 +149,8 @@ begin
         Temp_1_control => Temp_1_control_sig,
         Temp_2_control => Temp_2_control_sig,
         Temp_3_control => Temp_3_control_sig,
+        Temp_4_control => Temp_4_control_sig,
+        Temp_5_control => Temp_5_control_sig,
         PC_control => PC_control_sig,
         X_control => X_control_sig,
         AR_control => AR_control_sig,

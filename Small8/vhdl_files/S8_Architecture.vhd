@@ -15,7 +15,7 @@ entity S8_Architecture is
         ALU_flag_control: in std_logic_vector(7 downto 0) := (others => '0');
         internal_data_bus: inout std_logic_vector(7 downto 0) := (others => '0');
         -- (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
-        A_control, D_control, IR_control, Temp_1_control, Temp_2_control, Temp_3_control: in std_logic_vector(3 downto 0) := (others => '0'); 
+        A_control, D_control, IR_control, Temp_1_control, Temp_2_control, Temp_3_control, Temp_4_control, Temp_5_control: in std_logic_vector(3 downto 0) := (others => '0'); 
         -- (7) = upper increment, (6) = lower increment, (5) = upper tristate enable (4) = lower tristate enable, 
         -- (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
         PC_control, X_control, AR_control, SP_control: in std_logic_vector(7 downto 0) := (others => '0')       
@@ -47,14 +47,6 @@ architecture behavior of S8_Architecture is
         );
     end component;
 
-    component mux4to1 
-        port (
-            sel: in std_logic_vector(1 downto 0) := "00";
-            input_0, input_1, input_2, input_3: in std_logic_vector(7 downto 0) := (others => '0');
-            data_out: out std_logic_vector(7 downto 0)
-        );
-    end component;
-
     -- Flags
     signal C_flag_data_in_sig, C_flag_data_out_sig: std_logic_vector(0 downto 0) := (others => '0');
     signal V_flag_data_in_sig, V_flag_data_out_sig: std_logic_vector(0 downto 0) := (others => '0');
@@ -69,7 +61,7 @@ architecture behavior of S8_Architecture is
     signal D_data_out_sig: std_logic_vector(7 downto 0) := (others => '0');
     signal ALU_data_out_sig: std_logic_vector(7 downto 0) := (others => '0');
 
-    signal Temp_1_out_sig, Temp_2_out_sig, Temp_3_out_sig: std_logic_vector(7 downto 0) := (others => '0');
+    signal Temp_1_out_sig, Temp_2_out_sig, Temp_3_out_sig, Temp_4_out_sig, Temp_5_out_sig: std_logic_vector(7 downto 0) := (others => '0');
 
     -- 16 bit registers
     signal PC_lower_data_out_sig: std_logic_vector(7 downto 0) := (others => '0');
@@ -93,6 +85,7 @@ architecture behavior of S8_Architecture is
     signal Z_flag_control_sig: std_logic_vector(1 downto 0) := (others => '0');
 
     signal outport_0_sig, outport_1_sig: std_logic_vector(7 downto 0) := (others => '0');
+    
 
 begin
 
@@ -146,6 +139,33 @@ begin
         data_out => Temp_3_out_sig
     );
     internal_data_bus <= Temp_3_out_sig;
+
+
+    Temp_register_4: DFF_register
+    generic map (width => 8)
+    port map (
+        clock => clock,
+        inc => Temp_4_control(3),
+        out_enable => Temp_4_control(2),
+        load => Temp_4_control(1),
+        clear => Temp_4_control(0),
+        data_in => internal_data_bus,
+        data_out => Temp_4_out_sig
+    );
+    internal_data_bus <= Temp_4_out_sig;   
+
+    Temp_register_5: DFF_register
+    generic map (width => 8)
+    port map (
+        clock => clock,
+        inc => Temp_5_control(3),
+        out_enable => Temp_5_control(2),
+        load => Temp_5_control(1),
+        clear => Temp_5_control(0),
+        data_in => internal_data_bus,
+        data_out => Temp_5_out_sig
+    );
+    internal_data_bus <= Temp_5_out_sig;
 
     Z_flag_inst: DFF_register
     generic map (width => 1)
@@ -246,7 +266,7 @@ begin
     port map (
         clock => clock,
         inc => AR_control(6),
-        out_enable => AR_control(4),
+        out_enable => '1',
         load => AR_control(1),
         clear => AR_control(0),
         data_in => internal_data_bus,
@@ -259,7 +279,7 @@ begin
     port map (
         clock => clock,
         inc => AR_control(7),
-        out_enable => AR_control(5),
+        out_enable => '1',
         load => AR_control(3),
         clear => AR_control(2),
         data_in => internal_data_bus,
