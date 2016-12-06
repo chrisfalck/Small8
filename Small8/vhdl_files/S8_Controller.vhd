@@ -34,6 +34,7 @@ architecture behavior of S8_Controller is
 
     constant decode_opcode: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(63, 6));
 
+    -- Store the value pointed to by the two bytes following the LDAA opcode into A.
     constant LDAA: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(5, 6));
     constant LDAA_2: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(6, 6));
     constant LDAA_3: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(7, 6));
@@ -47,16 +48,19 @@ architecture behavior of S8_Controller is
     constant LDAA_8_1: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(15, 6));
     constant LDAA_9: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(16, 6));
 
-    constant STAA: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(17, 6));
+    -- Store A into D.
+    constant STAR: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(17, 6));
+
+    -- Bitwise AND A and D and store the output in A.
+    -- Set the Z and S flags during this operation. 
+    constant ANDR: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(18, 6));
+    constant ANDR_2: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(19, 6));
+    constant ANDR_3: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(20, 6));
+    constant ANDR_4: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(21, 6));
+
+    -- constant STAA: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(17, 6));
     -- constant STAA_2: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(9, 6));
     -- constant STAA_3: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(10, 6));
-
-    -- constant STAR: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(11, 6));
-
-    -- constant ANDR: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(12, 6));
-    -- constant ANDR_2: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(13, 6));
-    -- constant ANDR_3: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(14, 6));
-    -- constant ANDR_4: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(15, 6));
 
     -- -- A + D + C_flag -> A
     -- constant ADCR: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(16, 6));
@@ -135,12 +139,12 @@ begin
         elsif (curr_state = decode_opcode) then 
             if (IR_data = "10001000") then -- LDAA
                 next_state <= LDAA;
-            elsif (IR_data = "11110110") then -- STAA
-                next_state <= STAA;
-            -- elsif (IR_data = "11110001") then -- STAR
-            --     next_state <= STAR;
-            -- elsif (IR_data = "00100001") then -- ANDR
-            --     next_state <= ANDR;
+            -- elsif (IR_data = "11110110") then -- STAA
+                -- next_state <= STAA;
+            elsif (IR_data = "11110001") then -- STAR
+                next_state <= STAR;
+            elsif (IR_data = "00100001") then -- ANDR
+                next_state <= ANDR;
             -- elsif (IR_data = "00000001") then -- ADCR
             --     next_state <= ADCR;
             -- elsif (IR_data = "11010010") then -- BEQA
@@ -235,35 +239,35 @@ begin
         --     A_control(2) <= '1'; -- drive bus
         --     next_state <= fetch_opcode;
 
-        -- elsif (curr_state = STAR) then
-        --     -- PC_control(6) <= '1'; -- inc lower
-        --     A_control(2) <= '1'; -- drive bus           
-        --     D_control(1) <= '1'; -- read from bus
-        --     next_state <= fetch_opcode;
+        elsif (curr_state = STAR) then
+            -- PC_control(6) <= '1'; -- inc lower
+            A_control(2) <= '1'; -- drive bus           
+            D_control(1) <= '1'; -- read from bus
+            next_state <= fetch_opcode;
 
         -- -- Single register: 
         -- --      (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
         -- -- Dual Register: 
         -- --      (7) = upper increment (6) = lower increment (5) = upper tristate enable (4) = lower tristate enable, 
         -- --      (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
-        -- elsif (curr_state = ANDR) then
-        --     A_control(2) <= '1'; -- drive bus
-        --     Temp_1_control(1) <= '1'; -- read from bus
-        --     next_state <= ANDR_2;
-        -- elsif (curr_state = ANDR_2) then
-        --     D_control(2) <= '1'; -- drive bus
-        --     Temp_2_control(1) <= '1'; -- read from bus
-        --     next_state <= ANDR_3;
-        -- elsif (curr_state = ANDR_3) then
-        --     ALU_control <= "0100"; -- AND temp 1 and temp 2
-        --     ALU_flag_control(7) <= '1'; -- set Z flag
-        --     ALU_flag_control(5) <= '1'; -- set S flag
-        --     Temp_3_control(1) <= '1'; -- read from alu out bus
-        --     next_state <= ANDR_4;
-        -- elsif (curr_state = ANDR_4) then 
-        --     Temp_3_control(2) <= '1'; -- drive bus
-        --     A_control(1) <= '1'; -- read from bus
-        --     next_state <= fetch_opcode;
+        elsif (curr_state = ANDR) then
+            A_control(2) <= '1'; -- drive bus
+            Temp_1_control(1) <= '1'; -- read from bus
+            next_state <= ANDR_2;
+        elsif (curr_state = ANDR_2) then
+            D_control(2) <= '1'; -- drive bus
+            Temp_2_control(1) <= '1'; -- read from bus
+            next_state <= ANDR_3;
+        elsif (curr_state = ANDR_3) then
+            ALU_control <= "0100"; -- AND temp 1 and temp 2
+            ALU_flag_control(7) <= '1'; -- set Z flag
+            ALU_flag_control(5) <= '1'; -- set S flag
+            Temp_3_control(1) <= '1'; -- read from alu out bus
+            next_state <= ANDR_4;
+        elsif (curr_state = ANDR_4) then 
+            Temp_3_control(2) <= '1'; -- drive bus
+            A_control(1) <= '1'; -- read from bus
+            next_state <= fetch_opcode;
 
         -- -- Single register: 
         -- --      (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.

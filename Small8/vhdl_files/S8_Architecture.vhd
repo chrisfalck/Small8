@@ -108,7 +108,7 @@ begin
     port map (
         clock => clock,
         inc => Temp_1_control(3),
-        out_enable => Temp_1_control(2),
+        out_enable => '1',
         load => Temp_1_control(1),
         clear => Temp_1_control(0),
         data_in => internal_data_bus,
@@ -120,7 +120,7 @@ begin
     port map (
         clock => clock,
         inc => Temp_2_control(3),
-        out_enable => Temp_2_control(2),
+        out_enable => '1',
         load => Temp_2_control(1),
         clear => Temp_2_control(0),
         data_in => internal_data_bus,
