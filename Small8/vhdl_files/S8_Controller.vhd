@@ -120,6 +120,21 @@ architecture behavior of S8_Controller is
     constant RORC_2: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(69, 7));
     constant RORC_3: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(70, 7));
 
+    constant DECA: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(71, 7));
+    constant DECA_2: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(72, 7));
+    constant DECA_3: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(73, 7));
+
+    constant BNEA: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(74, 7));
+    constant BNEA_2: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(75, 7));
+    constant BNEA_2_1: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(76, 7));
+    constant BNEA_3: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(77, 7));
+    constant BNEA_4: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(78, 7));
+    constant BNEA_5: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(79, 7));
+    constant BNEA_5_1: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(80, 7));
+    constant BNEA_6: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(81, 7));
+    constant BNEA_7: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(82, 7));
+    constant BNEA_8: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(83, 7));
+
     signal curr_state, next_state: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(0, 7));
 
 begin
@@ -202,8 +217,74 @@ begin
                 -- Test Case B.
                 when "10000100" => next_state <= LDAI;
                 when "01100010" => next_state <= RORC;
+                when "11111011" => next_state <= DECA;
+                when "10110100" => next_state <= BNEA;
                 when others => next_state <= curr_state;
             end case;
+
+        elsif (curr_state = BNEA) then
+            if (ALU_flags(3) = '0') then 
+                PC_control(4) <= '1';
+                AR_control(1) <= '1';
+            else 
+                PC_control(6) <= '1';
+            end if;
+            next_state <= BNEA_2;
+        elsif (curr_state = BNEA_2) then 
+            if (ALU_flags(3) = '0') then 
+                PC_control(5) <= '1';
+                AR_control(3) <= '1';
+                next_state <= BNEA_2_1;
+            else 
+                PC_control(6) <= '1';
+                next_state <= fetch_opcode;
+            end if;
+        elsif (curr_state = BNEA_2_1) then
+            next_state <= BNEA_3;
+        elsif (curr_state = BNEA_3) then
+            Ram_out_bus_control <= '1';
+            Temp_4_control(1) <= '1';
+            PC_control(6) <= '1';
+            next_state <= BNEA_4;
+        elsif (curr_state = BNEA_4) then 
+            PC_control(4) <= '1';
+            AR_control(1) <= '1';
+            next_state <= BNEA_5;
+        elsif (curr_state = BNEA_5) then 
+            PC_control(5) <= '1';
+            AR_control(3) <= '1';
+            next_state <= BNEA_5_1;
+        elsif (curr_state = BNEA_5_1) then 
+            next_state <= BNEA_6;
+        elsif (curr_state = BNEA_6) then 
+            Ram_out_bus_control <= '1';
+            Temp_5_control(1) <= '1';
+            PC_control(6) <= '1';
+            next_state <= BNEA_7;
+        elsif (curr_state = BNEA_7) then 
+            PC_control(1) <= '1';
+            Temp_4_control(2) <= '1';
+            next_state <= BNEA_8;
+        elsif (curr_state = BNEA_8) then 
+            PC_control(3) <= '1';
+            Temp_5_control(1) <= '1';
+            next_state <= fetch_opcode;
+
+
+        elsif (curr_state = DECA) then 
+            Temp_1_control(1) <= '1';
+            A_control(2) <= '1';
+            next_state <= DECA_2;
+        elsif (curr_state = DECA_2) then 
+            ALU_flag_control(7) <= '1';
+            ALU_flag_control(5) <= '1';
+            ALU_control <= "1110";
+            Temp_3_control(1) <= '1';
+            next_state <= DECA_3;
+        elsif (curr_state = DECA_3) then 
+            Temp_3_control(2) <= '1';
+            A_control(1) <= '1';
+            next_state <= fetch_opcode;
 
         elsif (curr_state = RORC) then 
             Temp_1_control(1) <= '1';
@@ -475,11 +556,10 @@ begin
             if (ALU_flags(3) = '1') then 
                 PC_control(4) <= '1'; -- drive bus from lower
                 AR_control(1) <= '1'; -- read lower from bus
-                next_state <= BEQA_2; 
             else
                 PC_control(6) <= '1';
-                next_state <= BEQA_2;
             end if;
+            next_state <= BEQA_2;
         elsif (curr_state = BEQA_2) then 
             if (ALU_flags(3) = '1') then 
                 PC_control(5) <= '1'; -- drive bus from upper

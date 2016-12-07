@@ -157,13 +157,17 @@ begin
 
       -- Output 0. Overflow = '0'.
       when "1110" =>
-        output <= std_logic_vector(to_unsigned(0, width));
+        output <= std_logic_vector(unsigned(input1) - to_unsigned(1, width));
         overflow <= '0';
 
       -- Output 0. Overflow = '0'.
       when "1111" =>
-        output <= std_logic_vector(to_unsigned(0, width));
-        overflow <= '0';
+        uns_input1 := unsigned(input1);
+        uns_input2 := to_unsigned(1, width);
+        uns_arithmetic_output := (('0' & uns_input1) + uns_input2 + unsigned(carry_in));
+        std_arithmetic_output := std_logic_vector(uns_arithmetic_output);
+        output <= std_arithmetic_output(width - 1 downto 0);
+        overflow <= std_arithmetic_output(width); 
 
       -- Handle all other possible values of sel (like all other possible data types for std_logic).
       when others =>
