@@ -46,49 +46,49 @@ begin
     Seven_seg_0_inst: seven_segment
     port map (
         i => seven_seg_coded_signal_0(3 downto 0),
-        a => seven_seg_0(0),
-        b => seven_seg_0(1),
-        c => seven_seg_0(2),
+        a => seven_seg_0(6),
+        b => seven_seg_0(5),
+        c => seven_seg_0(4),
         d => seven_seg_0(3),
-        e => seven_seg_0(4),
-        f => seven_seg_0(5),
-        g => seven_seg_0(6)
+        e => seven_seg_0(2),
+        f => seven_seg_0(1),
+        g => seven_seg_0(0)
     );
 
     Seven_seg_1_inst: seven_segment
     port map (
         i => seven_seg_coded_signal_0(7 downto 4),
-        a => seven_seg_1(0),
-        b => seven_seg_1(1),
-        c => seven_seg_1(2),
+        a => seven_seg_1(6),
+        b => seven_seg_1(5),
+        c => seven_seg_1(4),
         d => seven_seg_1(3),
-        e => seven_seg_1(4),
-        f => seven_seg_1(5),
-        g => seven_seg_1(6)
+        e => seven_seg_1(2),
+        f => seven_seg_1(1),
+        g => seven_seg_1(0)
     );
 
     Seven_seg_2_inst: seven_segment
     port map (
-        i => seven_seg_coded_signal_0(3 downto 0),
-        a => seven_seg_2(0),
-        b => seven_seg_2(1),
-        c => seven_seg_2(2),
+        i => seven_seg_coded_signal_1(3 downto 0),
+        a => seven_seg_2(6),
+        b => seven_seg_2(5),
+        c => seven_seg_2(4),
         d => seven_seg_2(3),
-        e => seven_seg_2(4),
-        f => seven_seg_2(5),
-        g => seven_seg_2(6)
+        e => seven_seg_2(2),
+        f => seven_seg_2(1),
+        g => seven_seg_2(0)
     );
 
     Seven_seg_3_inst: seven_segment
     port map (
-        i => seven_seg_coded_signal_0(7 downto 4),
-        a => seven_seg_3(0),
-        b => seven_seg_3(1),
-        c => seven_seg_3(2),
+        i => seven_seg_coded_signal_1(7 downto 4),
+        a => seven_seg_3(6),
+        b => seven_seg_3(5),
+        c => seven_seg_3(4),
         d => seven_seg_3(3),
-        e => seven_seg_3(4),
-        f => seven_seg_3(5),
-        g => seven_seg_3(6)
+        e => seven_seg_3(2),
+        f => seven_seg_3(1),
+        g => seven_seg_3(0)
     );
 
 
