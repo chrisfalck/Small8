@@ -16,6 +16,9 @@ entity S8_Architecture is
         internal_data_bus: inout std_logic_vector(7 downto 0) := (others => '0');
         -- (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
         A_control, D_control, IR_control, Temp_1_control, Temp_2_control, Temp_3_control, Temp_4_control, Temp_5_control: in std_logic_vector(3 downto 0) := (others => '0'); 
+        out_reg_0_control, out_reg_1_control, in_reg_0_control, in_reg_1_control: in std_logic_vector(3 downto 0) := (others => '0');
+        in_or_out_port_0_targeted: out std_logic := '0';
+        in_or_out_port_1_targeted: out std_logic := '0';
         -- (7) = upper increment, (6) = lower increment, (5) = upper tristate enable (4) = lower tristate enable, 
         -- (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
         PC_control, X_control, AR_control, SP_control: in std_logic_vector(7 downto 0) := (others => '0')       
@@ -85,12 +88,64 @@ architecture behavior of S8_Architecture is
     signal Z_flag_control_sig: std_logic_vector(1 downto 0) := (others => '0');
 
     signal outport_0_sig, outport_1_sig: std_logic_vector(7 downto 0) := (others => '0');
-    
 
 begin
 
-    outport_0 <= outport_0_sig;
-    outport_1 <= outport_1_sig;
+    with (AR_upper_data_out_sig & AR_lower_data_out_sig) select
+        in_or_out_port_0_targeted <= '1' when "1111111111111110",
+                                     '0' when others;
+
+    with (AR_upper_data_out_sig & AR_lower_data_out_sig) select
+        in_or_out_port_1_targeted <= '1' when "1111111111111111", 
+                                     '0' when others;
+
+    in_reg_1_inst: DFF_register
+    generic map(width => 8)
+    port map (
+        clock => clock,
+        inc => in_reg_1_control(3),
+        out_enable => in_reg_1_control(2),
+        load => '1',
+        clear => in_reg_1_control(0),
+        data_in => inport_1,
+        data_out => internal_data_bus
+    );
+
+    in_reg_0_inst: DFF_register
+    generic map(width => 8)
+    port map (
+        clock => clock,
+        inc => in_reg_0_control(3),
+        out_enable => in_reg_0_control(2),
+        load => '1',
+        clear => in_reg_0_control(0),
+        data_in => inport_0,
+        data_out => internal_data_bus
+    );
+
+    out_reg_1_inst: DFF_register
+    generic map(width => 8)
+    port map (
+        clock => clock,
+        inc => out_reg_1_control(3),
+        out_enable => '1',
+        load => out_reg_1_control(1),
+        clear => out_reg_1_control(0),
+        data_in => internal_data_bus,
+        data_out => outport_1
+    );
+
+    out_reg_0_inst: DFF_register
+    generic map(width => 8)
+    port map (
+        clock => clock,
+        inc => out_reg_0_control(3),
+        out_enable => '1',
+        load => out_reg_0_control(1),
+        clear => out_reg_0_control(0),
+        data_in => internal_data_bus,
+        data_out => outport_0
+    );
 
     alu_inst: alu_ns
     generic map(width => 8)   

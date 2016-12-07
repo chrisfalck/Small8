@@ -19,9 +19,9 @@ architecture behavior of Small8 is
     -- Data register
     signal D_control_sig: std_logic_vector(3 downto 0) := (others => '0');
     -- Instruction register
-    signal IR_control_sig, Temp_1_control_sig, Temp_2_control_sig, Temp_3_control_sig, Temp_4_control_sig, Temp_5_control_sig: std_logic_vector(3 downto 0) := (others => '0');
+    signal IR_control_sig, Temp_1_control_sig, Temp_2_control_sig, Temp_3_control_sig, Temp_4_control_sig: std_logic_vector(3 downto 0) := (others => '0');
+    signal Temp_5_control_sig, out_reg_0_control_sig, out_reg_1_control_sig, in_reg_0_control_sig, in_reg_1_control_sig: std_logic_vector(3 downto 0) := (others => '0');
 
-    
     -- (5) = upper tristate enable (4) = lower tristate enable, 
     -- (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
     -- Program counter registers    
@@ -46,6 +46,8 @@ architecture behavior of Small8 is
 
     signal ALU_flag_control_sig: std_logic_vector(7 downto 0);
 
+    signal in_or_out_port_0_targeted_sig, in_or_out_port_1_targeted_sig: std_logic := '0';
+
     signal IR_data_sig: std_logic_vector(7 downto 0) := (others => '0');    
     component S8_Controller
         port (
@@ -59,6 +61,9 @@ architecture behavior of Small8 is
             Ram_control, ram_out_bus_control: out std_logic;
             -- (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
             A_control, D_control, IR_control, Temp_1_control, Temp_2_control, Temp_3_control, Temp_4_control, Temp_5_control: out std_logic_vector(3 downto 0); 
+            out_reg_0_control, out_reg_1_control, in_reg_0_control, in_reg_1_control: out std_logic_vector(3 downto 0) := (others => '0'); 
+            in_or_out_port_0_targeted: in std_logic := '0';
+            in_or_out_port_1_targeted: in std_logic := '0';
             -- (7) = upper increment (6) = lower increment (5) = upper tristate enable (4) = lower tristate enable, 
             -- (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
             PC_control, X_control, AR_control, SP_control: out std_logic_vector(7 downto 0) 
@@ -79,6 +84,9 @@ architecture behavior of Small8 is
             ALU_flags: out std_logic_vector(3 downto 0);
             -- (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
             A_control, D_control, IR_control, Temp_1_control, Temp_2_control, Temp_3_control, Temp_4_control, Temp_5_control: in std_logic_vector(3 downto 0); 
+            out_reg_0_control, out_reg_1_control, in_reg_0_control, in_reg_1_control: in std_logic_vector(3 downto 0) := (others => '0'); 
+            in_or_out_port_0_targeted: out std_logic := '0';
+            in_or_out_port_1_targeted: out std_logic := '0';
             -- (7) = upper increment (6) = lower increment (5) = upper tristate enable (4) = lower tristate enable, 
             -- (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
             PC_control, X_control, AR_control, SP_control: in std_logic_vector(7 downto 0)        
@@ -124,6 +132,12 @@ begin
         Temp_3_control => Temp_3_control_sig,
         Temp_4_control => Temp_4_control_sig,
         Temp_5_control => Temp_5_control_sig,
+        out_reg_0_control => out_reg_0_control_sig,
+        out_reg_1_control => out_reg_1_control_sig,
+        in_reg_0_control => in_reg_0_control_sig,
+        in_reg_1_control => in_reg_1_control_sig,
+        in_or_out_port_0_targeted => in_or_out_port_0_targeted_sig,
+        in_or_out_port_1_targeted => in_or_out_port_1_targeted_sig,
         PC_control => PC_control_sig,
         X_control => X_control_sig,
         AR_control => AR_control_sig,
@@ -151,6 +165,12 @@ begin
         Temp_3_control => Temp_3_control_sig,
         Temp_4_control => Temp_4_control_sig,
         Temp_5_control => Temp_5_control_sig,
+        out_reg_0_control => out_reg_0_control_sig,
+        out_reg_1_control => out_reg_1_control_sig,
+        in_or_out_port_0_targeted => in_or_out_port_0_targeted_sig,
+        in_or_out_port_1_targeted => in_or_out_port_1_targeted_sig,
+        in_reg_0_control => in_reg_0_control_sig,
+        in_reg_1_control => in_reg_1_control_sig,
         PC_control => PC_control_sig,
         X_control => X_control_sig,
         AR_control => AR_control_sig,

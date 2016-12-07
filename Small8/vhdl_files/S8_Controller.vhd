@@ -16,6 +16,9 @@ entity S8_Controller is
         Ram_out_bus_control: out std_logic := '0';
         -- (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
         A_control, D_control, IR_control, Temp_1_control, Temp_2_control, Temp_3_control, Temp_4_control, Temp_5_control: out std_logic_vector(3 downto 0) := (others => '0'); 
+        out_reg_0_control, out_reg_1_control, in_reg_0_control, in_reg_1_control: out std_logic_vector(3 downto 0) := (others => '0'); 
+        in_or_out_port_0_targeted: in std_logic := '0';
+        in_or_out_port_1_targeted: in std_logic := '0';
         -- (7) = upper increment (6) = lower increment (5) = upper tristate enable (4) = lower tristate enable, 
         -- (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
         PC_control, X_control, AR_control, SP_control: out std_logic_vector(7 downto 0) := (others => '0')
@@ -98,6 +101,7 @@ architecture behavior of S8_Controller is
     signal curr_state, next_state: std_logic_vector(5 downto 0) := std_logic_vector(to_unsigned(0, 6));
 
 begin
+
     -- Tranistion to next_state on the active clock edge.
     process begin
         wait until (clock'event and clock='1');
@@ -126,6 +130,10 @@ begin
         Temp_3_control <= (others => '0'); 
         Temp_4_control <= (others => '0'); 
         Temp_5_control <= (others => '0'); 
+        out_reg_0_control <= (others => '0');
+        out_reg_1_control <= (others => '0');
+        in_reg_0_control <= (others => '0');
+        in_reg_1_control <= (others => '0');
         Ram_out_bus_control <= '0'; 
         Ram_control <= '0';
         next_state <= curr_state;
@@ -167,19 +175,6 @@ begin
                 when "11110110" => next_state <= STAA;
                 when others => next_state <= curr_state;
             end case;
-            -- if (IR_data = "10001000") then
-            --     next_state <= LDAA;
-            -- elsif (IR_data = "11110110") then
-            --     next_state <= STAA;
-            -- elsif (IR_data = "11110001") then
-            --     next_state <= STAR;
-            -- elsif (IR_data = "00100001") then
-            --     next_state <= ANDR;
-            -- elsif (IR_data = "00000001") then
-            --     next_state <= ADCR;
-            -- elsif (IR_data = "10110010") then
-            --     next_state <= BEQA;
-            
 
         elsif (curr_state = STAR) then
             A_control(2) <= '1'; -- drive bus           
@@ -222,7 +217,7 @@ begin
             Ram_out_bus_control <= '1'; -- drive bus with mem
             Temp_5_control(1) <= '1'; -- read from bus
             next_state <= LDAA_7;
-        elsif (curr_state = LDAA_7) then 
+        elsif (curr_state = LDAA_7) then  -- At this point, Temp_4 contains value at mem(PC-1) and Temp_5 has mem(PC).
             Temp_4_control(2) <= '1'; -- drive bus
             AR_control(1) <= '1'; -- read from bus        
             next_state <= LDAA_8;
@@ -235,7 +230,13 @@ begin
             -- Wait for address to register. 
             next_state <= LDAA_9;
         elsif (curr_state = LDAA_9) then
-            Ram_out_bus_control <= '1'; -- drive bus with mem
+            if (in_or_out_port_0_targeted = '1') then 
+                in_reg_0_control(2) <= '1';
+            elsif (in_or_out_port_1_targeted = '1') then 
+                in_reg_1_control(2) <= '1';
+            else 
+                Ram_out_bus_control <= '1'; -- drive bus with mem
+            end if;
             A_control(1) <= '1'; -- read from bus
             next_state <= fetch_opcode;
 
@@ -287,8 +288,14 @@ begin
             -- Wait for address to register. 
             next_state <= STAA_9;
         elsif (curr_state = STAA_9) then
+            if (in_or_out_port_0_targeted = '1') then 
+                out_reg_0_control(1) <= '1';
+            elsif (in_or_out_port_1_targeted = '1') then 
+                out_reg_1_control(1) <= '1';
+            else
+                Ram_control <= '1'; -- write bus to ram at address AR
+            end if;
             A_control(2) <= '1'; -- write to bus
-            Ram_control <= '1'; -- write bus to ram at address AR
             next_state <= fetch_opcode;
 
         -- -- Single register: 
