@@ -30,8 +30,11 @@ architecture behavior of Top_Level is
     end component;
 
     signal seven_seg_coded_signal_0, seven_seg_coded_signal_1: std_logic_vector(7 downto 0);
+    signal reset_flipped_for_button: std_logic := '0';
 
 begin
+
+    reset_flipped_for_button <= not(reset);
 
     Small8_inst: Small8
     port map (
@@ -40,7 +43,7 @@ begin
         outport_0 => seven_seg_coded_signal_0,
         outport_1 => seven_seg_coded_signal_1,
         clock => clock,
-        reset => reset
+        reset => reset_flipped_for_button
     );
 
     Seven_seg_0_inst: seven_segment

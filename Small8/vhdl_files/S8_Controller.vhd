@@ -135,6 +135,21 @@ architecture behavior of S8_Controller is
     constant BNEA_7: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(82, 7));
     constant BNEA_8: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(83, 7));
 
+    constant LDXI: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(84, 7));
+    constant LDXI_2: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(85, 7));
+    constant LDXI_2_1: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(86, 7));
+    constant LDXI_3: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(87, 7));
+    constant LDXI_4: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(88, 7));
+    constant LDXI_5: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(89, 7));
+    constant LDXI_5_1: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(90, 7));
+    constant LDXI_6: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(91, 7));
+
+    constant LDAAX: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(92, 7));
+    constant LDAAX_2: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(93, 7));
+    constant LDAAX_2_1: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(94, 7));
+    constant LDAAX_3: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(95, 7));
+
+
     signal curr_state, next_state: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(0, 7));
 
 begin
@@ -219,9 +234,65 @@ begin
                 when "01100010" => next_state <= RORC;
                 when "11111011" => next_state <= DECA;
                 when "10110100" => next_state <= BNEA;
+                -- Test Case C
+                when "10001010" => next_state <= LDXI;
+                when "10111100" => next_state <= LDAAX;
                 when others => next_state <= curr_state;
             end case;
 
+       
+        elsif (curr_state = LDAAX) then 
+            X_control(4) <= '1';
+            AR_control(1) <= '1';
+            next_state <= LDAAX_2;
+        elsif (curr_state = LDAAX_2) then 
+            X_control(5) <= '1';
+            AR_control(3) <= '1';
+            next_state <= LDAAX_2_1;
+        elsif (curr_state = LDAAX_2_1) then        
+            next_state <= LDAAX_3;
+        elsif (curr_state = LDAAX_3) then 
+            Ram_out_bus_control <= '1';
+            A_control(1) <= '1';
+            next_state <= fetch_opcode;
+
+        -- Single register: 
+        --      (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
+        -- Dual Register: 
+        --      (7) = upper increment (6) = lower increment (5) = upper tristate enable (4) = lower tristate enable, 
+        --      (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
+        elsif (curr_state = LDXI) then 
+            PC_control(4) <= '1';
+            AR_control(1) <= '1';
+            next_state <= LDXI_2;
+        elsif (curr_state = LDXI_2) then 
+            PC_control(5) <= '1';
+            AR_control(3) <= '1';
+            next_state <= LDXI_2_1;
+        elsif (curr_state = LDXI_2_1) then        
+            next_state <= LDXI_3;
+        elsif (curr_state = LDXI_3) then 
+            Ram_out_bus_control <= '1';
+            X_control(1) <= '1';
+            PC_control(6) <= '1';
+            next_state <= LDXI_4;
+        elsif (curr_state = LDXI_4) then 
+            PC_control(4) <= '1';
+            AR_control(1) <= '1';
+            next_state <= LDXI_5;
+        elsif (curr_state = LDXI_5) then 
+            PC_control(5) <= '1';
+            AR_control(3) <= '1';
+            next_state <= LDXI_5_1;
+        elsif (curr_state = LDXI_5_1) then        
+            next_state <= LDXI_6;
+        elsif (curr_state = LDXI_6) then 
+            Ram_out_bus_control <= '1';
+            X_control(3) <= '1';
+            PC_control(6) <= '1';
+            next_state <= fetch_opcode;
+
+        
         elsif (curr_state = BNEA) then
             if (ALU_flags(3) = '0') then 
                 PC_control(4) <= '1';
@@ -270,7 +341,11 @@ begin
             Temp_5_control(1) <= '1';
             next_state <= fetch_opcode;
 
-
+        -- Single register: 
+        --      (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
+        -- Dual Register: 
+        --      (7) = upper increment (6) = lower increment (5) = upper tristate enable (4) = lower tristate enable, 
+        --      (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
         elsif (curr_state = DECA) then 
             Temp_1_control(1) <= '1';
             A_control(2) <= '1';
