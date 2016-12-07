@@ -109,13 +109,16 @@ architecture behavior of S8_Controller is
     constant BCAA_7: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(61, 7));
     constant BCAA_8: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(62, 7));
 
+    constant decode_opcode: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(63, 7));
+
     constant LDAI: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(64, 7));
     constant LDAI_2: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(65, 7));
     constant LDAI_2_1: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(66, 7));
     constant LDAI_3: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(67, 7));
 
-    constant decode_opcode: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(63, 7));
-
+    constant RORC: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(68, 7));
+    constant RORC_2: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(69, 7));
+    constant RORC_3: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(70, 7));
 
     signal curr_state, next_state: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(0, 7));
 
@@ -198,16 +201,31 @@ begin
                 when "10110000" => next_state <= BCAA;
                 -- Test Case B.
                 when "10000100" => next_state <= LDAI;
+                when "01100010" => next_state <= RORC;
                 when others => next_state <= curr_state;
             end case;
+
+        elsif (curr_state = RORC) then 
+            Temp_1_control(1) <= '1';
+            A_control(2) <= '1';
+            next_state <= RORC_2;
+        elsif (curr_state = RORC_2) then 
+            ALU_flag_control(7) <= '1';
+            ALU_flag_control(5) <= '1';
+            ALU_flag_control(1) <= '1';
+            ALU_control <= "1011";
+            Temp_3_control(1) <= '1';
+            next_state <= RORC_3;
+        elsif (curr_state = RORC_3) then 
+            Temp_3_control(2) <= '1';
+            A_control(1) <= '1';
+            next_state <= fetch_opcode;
             
-        -- LDAA Starts at state 5
         -- Single register: 
         --      (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
         -- Dual Register: 
         --      (7) = upper increment (6) = lower increment (5) = upper tristate enable (4) = lower tristate enable, 
         --      (3) = upper load, (2) = upper clear, (1) lower load, (0) lower clear.
-
         elsif (curr_state = LDAI) then 
             PC_control(4) <= '1';
             AR_control(1) <= '1';
@@ -281,7 +299,6 @@ begin
             D_control(1) <= '1'; -- read from bus
             next_state <= fetch_opcode;
 
-        -- LDAA Starts at state 5
         -- Single register: 
         --      (3) = increment, (2) = tristate enable, (1) = load, (0) = clear.
         -- Dual Register: 

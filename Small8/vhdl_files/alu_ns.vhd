@@ -25,6 +25,7 @@ begin
     variable uns_input1 : unsigned(width - 1 downto 0) := to_unsigned(0, width);
     variable uns_input2 : unsigned(width - 1 downto 0) := to_unsigned(0, width);
     variable uns_operation_output : unsigned(width - 1 downto 0) := to_unsigned(0, width);
+    variable uns_carry : unsigned(0 downto 0) := to_unsigned(0, 1);
 
     -- We use (width downto 0) rather than width - 1 because we need room for the carry bit.
     variable uns_arithmetic_output : unsigned(width downto 0) := to_unsigned(0, width + 1);
@@ -134,7 +135,9 @@ begin
       -- Output input1 shifted right by 1 bit. Overflow = the least significant bit that gets popped from the original input1.
       when "1011" =>
         uns_input1 := unsigned(input1);
+        uns_carry := unsigned(carry_in);
         uns_operation_output := shift_right(uns_input1, 1);
+        uns_operation_output(width - 1) := uns_carry(0);
         output <= std_logic_vector(uns_operation_output);
         overflow <= input1(0);
 
