@@ -149,6 +149,9 @@ architecture behavior of S8_Controller is
     constant LDAAX_2_1: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(94, 7));
     constant LDAAX_3: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(95, 7));
 
+    constant INCX: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(96, 7));
+    constant INCX_2: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(97, 7));
+    constant INCX_3: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(98, 7));
 
     signal curr_state, next_state: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(0, 7));
 
@@ -237,10 +240,23 @@ begin
                 -- Test Case C
                 when "10001010" => next_state <= LDXI;
                 when "10111100" => next_state <= LDAAX;
+                when "11111100" => next_state <= INCX;
                 when others => next_state <= curr_state;
             end case;
 
-       
+        elsif (curr_state = INCX) then 
+            Temp_1_control(1) <= '1';
+            X_control(4) <= '1';
+            next_state <= INCX_2;
+        elsif (curr_state = INCX_2) then 
+            ALU_control <= "1111";
+            Temp_3_control(1) <= '1';
+            next_state <= INCX_3;
+        elsif (curr_state = INCX_3) then 
+            Temp_3_control(2) <= '1';
+            X_control(1) <= '1';
+            next_state <= fetch_opcode;
+
         elsif (curr_state = LDAAX) then 
             X_control(4) <= '1';
             AR_control(1) <= '1';
@@ -292,7 +308,6 @@ begin
             PC_control(6) <= '1';
             next_state <= fetch_opcode;
 
-        
         elsif (curr_state = BNEA) then
             if (ALU_flags(3) = '0') then 
                 PC_control(4) <= '1';

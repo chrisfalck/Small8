@@ -84,6 +84,11 @@ begin
         uns_arithmetic_output := (('0' & uns_input1) + uns_input2 + unsigned(carry_in));
         std_arithmetic_output := std_logic_vector(uns_arithmetic_output);
         output <= std_arithmetic_output(width - 1 downto 0);
+        -- if (std_arithmetic_output = "011111111") then 
+        --     overflow <= '1';
+        -- else 
+        --     overflow <= '0';
+        -- end if;
         overflow <= std_arithmetic_output(width);
 
       -- Output input1 - input2. Overflow = '0'.
@@ -158,7 +163,11 @@ begin
       -- Output 0. Overflow = '0'.
       when "1110" =>
         output <= std_logic_vector(unsigned(input1) - to_unsigned(1, width));
-        overflow <= '0';
+        if (input1 = "00000000") then 
+            overflow <= '1';
+        else 
+            overflow <= '0';
+        end if;
 
       -- Output 0. Overflow = '0'.
       when "1111" =>

@@ -5,21 +5,21 @@ Data_radix = hex;
 % Program RAM Data %
 Content
   Begin
-0000 : 84;
-0001 : 0A;
-0002 : F6;
+0000 : 84; -- No flags effect
+0001 : 0A; 
+0002 : F6; -- No flags effect
 0003 : 24; 
-0004 : 00;
-0005 : 8A;
-0006 : 25;
-0007 : 00;
-0008 : 84;
-0009 : 00;
-000A : F1;
-000B : F9;
-000C : BC;
-000D : 01;
-000E : F1;
+0004 : 00; 
+0005 : 8A; -- No flags effect
+0006 : 25; 
+0007 : 00; 
+0008 : 84; -- No flags effect
+0009 : 00; 
+000A : F1; -- No flags effect
+000B : F9; -- C flag to zero 
+000C : BC; -- No flags effect
+000D : 01; -- Affect all flags
+000E : F1; -- STAR D
 000F : 88;
 0010 : 24;
 0011 : 00;
@@ -39,6 +39,8 @@ Content
 001F : B4;
 0020 : 1E;
 0021 : 00;
+0022 : 00;
+0023 : 00;
 0024 : 01;
 0025 : 01;
 0026 : 02;
