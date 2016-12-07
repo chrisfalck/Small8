@@ -37,7 +37,7 @@ begin
         wait for 50 ns;
         reset_sig <= '0';
 
-        for i in 0 to 300 loop
+        for i in 0 to 500 loop
             clock_sig <= not(clock_sig);
             wait for 1000 ns;
         end loop;
