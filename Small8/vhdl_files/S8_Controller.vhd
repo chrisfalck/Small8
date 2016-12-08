@@ -153,6 +153,17 @@ architecture behavior of S8_Controller is
     constant INCX_2: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(97, 7));
     constant INCX_3: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(98, 7));
 
+    constant BPLA: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(99, 7));
+    constant BPLA_2: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(100, 7));
+    constant BPLA_2_1: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(101, 7));
+    constant BPLA_3: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(102, 7));
+    constant BPLA_4: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(103, 7));
+    constant BPLA_5: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(104, 7));
+    constant BPLA_5_1: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(105, 7));
+    constant BPLA_6: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(106, 7));
+    constant BPLA_7: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(107, 7));
+    constant BPLA_8: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(108, 7));
+
     signal curr_state, next_state: std_logic_vector(6 downto 0) := std_logic_vector(to_unsigned(0, 7));
 
 begin
@@ -241,8 +252,60 @@ begin
                 when "10001010" => next_state <= LDXI;
                 when "10111100" => next_state <= LDAAX;
                 when "11111100" => next_state <= INCX;
+
+                -- Mult
+                when "10110101" => next_state <= BPLA;
+                -- BCCA
                 when others => next_state <= curr_state;
             end case;
+
+        elsif (curr_state = BPLA) then 
+            if (ALU_flags(2) = '0') then 
+                PC_control(4) <= '1';
+                AR_control(1) <= '1';
+            else 
+                PC_control(6) <= '1';
+            end if;
+            next_state <= BPLA_2;
+        elsif (curr_state = BPLA_2) then 
+            if (ALU_flags(2) = '0') then 
+                PC_control(5) <= '1';
+                AR_control(3) <= '1';
+                next_state <= BPLA_2_1;
+            else 
+                PC_control(6) <= '1';
+                next_state <= fetch_opcode;
+            end if;
+        elsif (curr_state = BPLA_2_1) then
+            next_state <= BPLA_3;
+        elsif (curr_state = BPLA_3) then
+            Ram_out_bus_control <= '1';
+            Temp_4_control(1) <= '1';
+            PC_control(6) <= '1';
+            next_state <= BPLA_4;
+        elsif (curr_state = BPLA_4) then 
+            PC_control(4) <= '1';
+            AR_control(1) <= '1';
+            next_state <= BPLA_5;
+        elsif (curr_state = BPLA_5) then 
+            PC_control(5) <= '1';
+            AR_control(3) <= '1';
+            next_state <= BPLA_5_1;
+        elsif (curr_state = BPLA_5_1) then 
+            next_state <= BPLA_6;
+        elsif (curr_state = BPLA_6) then 
+            Ram_out_bus_control <= '1';
+            Temp_5_control(1) <= '1';
+            PC_control(6) <= '1';
+            next_state <= BPLA_7;
+        elsif (curr_state = BPLA_7) then 
+            PC_control(1) <= '1';
+            Temp_4_control(2) <= '1';
+            next_state <= BPLA_8;
+        elsif (curr_state = BPLA_8) then 
+            PC_control(3) <= '1';
+            Temp_5_control(1) <= '1';
+            next_state <= fetch_opcode;   
 
         elsif (curr_state = INCX) then 
             Temp_1_control(1) <= '1';
